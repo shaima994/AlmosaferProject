@@ -1,9 +1,11 @@
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Random;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -95,7 +97,7 @@ public class MyTestCases {
 	@Test(priority = 6,enabled = false)
 	 public void CheckDepartureDate() {
 		
-		int Today = LocalDate.now().getDayOfMonth();
+	
 		
 		int Tomorrow = LocalDate.now().plusDays(1).getDayOfMonth();
 		
@@ -112,7 +114,7 @@ public class MyTestCases {
 	@Test(priority = 7,enabled = false)
 	 public void CheckReturnDate() {
 		
-		int Today = LocalDate.now().getDayOfMonth();
+		
 		
 		int TheDayAfterTommorow = LocalDate.now().plusDays(2).getDayOfMonth();
 		
@@ -126,37 +128,100 @@ public class MyTestCases {
 	
 	}
 	
-	@Test(priority = 8)
-	public void RandomChangeTheLanguage() {
-		
-		String [] myWebsites = {"https://global.almosafer.com/en", "https://global.almosafer.com/ar"};
-		
+	@Test(priority = 8,enabled = false)
+	public void RandomChangeTheLanguage() throws InterruptedException {
+		String[] EnglishCitiesNames = { "jeddah", "riyadh", "dubai" };
+		String[] ArabicCitiesNames = { "دبي", "جدة" };
+
+		int randomArabicCity = rand.nextInt(ArabicCitiesNames.length);
+		int randomEnglishCity = rand.nextInt(EnglishCitiesNames.length);
+
+		String[] myWebsites = { "https://www.almosafer.com/ar", "https://www.almosafer.com/en" };
+
 		int randomIndex = rand.nextInt(myWebsites.length);
-		
+
 		driver.get(myWebsites[randomIndex]);
-		
-		if(driver.getCurrentUrl().equals("https://www.almosafer.com/ar")) {
+
+		WebElement HotelTab = driver.findElement(By.id("uncontrolled-tab-example-tab-hotels"));
+
+		HotelTab.click();
+
+		WebElement HotelSearchBar = driver.findElement(By.cssSelector(".sc-phbroq-2.uQFRS.AutoComplete__Input"));
+
+		if (driver.getCurrentUrl().equals("https://www.almosafer.com/ar")) {
 			String ActualLaguage = driver.findElement(By.tagName("html")).getAttribute("lang");
 			String ExpectedLanguage = "ar";
 
 			Assert.assertEquals(ActualLaguage, ExpectedLanguage);
-			
-		}else {
-			
+			HotelSearchBar.sendKeys(ArabicCitiesNames[randomArabicCity]);
+		} else {
 			String ActualLaguage = driver.findElement(By.tagName("html")).getAttribute("lang");
 			String ExpectedLanguage = "en";
 
 			Assert.assertEquals(ActualLaguage, ExpectedLanguage);
-			
-		}	
+			HotelSearchBar.sendKeys(EnglishCitiesNames[randomEnglishCity]);
+
+		}
+
+		Thread.sleep(2000);
+
+		WebElement CitiesList = driver.findElement(By.cssSelector(".sc-phbroq-4.gGwzVo.AutoComplete__List"));
+		
+		CitiesList.findElements(By.tagName("li")).get(1).click();
+		
+		WebElement SelectNumerOfVistor = driver.findElement(By.cssSelector(".sc-tln3e3-1.gvrkTi"));
+		
+		Select select = new Select(SelectNumerOfVistor);
+		
+		int RandomVistorNumber = rand.nextInt(2);
+		
+		select.selectByIndex(RandomVistorNumber);
 		
 		
+		
+		WebElement SearchStaysButton = driver.findElement(By.xpath("//button[@class='sc-jTzLTM hQpNle sc-1vkdpp9-6 iKBWgG js-HotelSearchBox__SearchButton btn btn-primary btn-block']"));
+		
+		SearchStaysButton.click();
+		
+		Thread.sleep(3000);
+
 		
 	}
 	
 	
 	
+	@Test(priority = 9,enabled = false)
+	public void CheckThatThePageIsFullyLoaded() {
+		
+		
+		WebElement SearchResult = driver.findElement(By.xpath("//span[@data-testid='srp_properties_found']"));
+		
+		boolean ActualResult=SearchResult.getText().contains("found") || SearchResult.getText().contains("مكان");
+		
+		boolean ExpectedResult = true;
+		
+		Assert.assertEquals(ActualResult, ExpectedResult);
+		
+	}
 	
+	@Test(priority = 10)
+	public void CheckTheSortOption() throws InterruptedException {
+		
+		Thread.sleep(35000);
+		
+		driver.get("https://www.almosafer.com/en/hotels/Dubai/11-11-2024/12-11-2024/2_adult?placeId=ChIJRcbZaklDXz4RYlEphFBu5r0&city=Dubai&sortBy=RECOMMENDATION");
+		
+		WebElement LowestPriceButton = driver.findElement(By.cssSelector("body > div:nth-child(2) > div:nth-child(2) > div:nth-child(5) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2)"));
+		
+		LowestPriceButton.click();
+		
+		List<WebElement> allPrices = driver.findElements(By.cssSelector(".__ds__comp.undefined.MuiBox-root muiltr-1nylpq2"));
+		
+		
+		System.out.print(allPrices.size());
+		
+		
+	}
 	
 	
 	
